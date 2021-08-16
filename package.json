@@ -1,0 +1,30 @@
+{
+  "name": "ts-webpack-boilerplate",
+  "version": "1.0.0",
+  "description": "Boilerplate with webpack and typescript",
+  "main": "./src/main.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack --mode development",
+    "build": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/waynethebb/ts-webpack-boilerplate.git"
+  },
+  "keywords": [
+    "typescript"
+  ],
+  "author": "Wayne",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/waynethebb/ts-webpack-boilerplate/issues"
+  },
+  "homepage": "https://github.com/waynethebb/ts-webpack-boilerplate#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.29.1",
+    "@typescript-eslint/parser": "^4.29.1",
+    "eslint": "^7.32.0",
+    "typescript": "^4.3.5"
+  }
+}
