@@ -1,5 +1,9 @@
-export class Trailer {
-  constructor(material: string) {
-    console.log("add trailer hull" + material);
+interface Hull {
+  add(material: string): void;
+}
+
+export class Trailer implements Hull {
+  add(material: string): void {
+    console.log("add hull with" + material);
   }
 }

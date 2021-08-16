@@ -1,50 +1,56 @@
 import { Scene } from "../render/scene";
 //import Render from "./render/index";
-type measurements = { LOA: number; beam: number; draft: number };
+type measurements = {
+  LOA: number;
+  beam: number;
+  draught: number;
+  LB_ratio: number;
+  BD_ratio: number;
+};
 type coefficients = { CB: number; CP: number };
 interface ParentBoat {
-  set LOA(num: number);
-  set CB_ratio(ratio: number);
-  set BD_ratio(ratio: number);
+  //set LOA(num: number);
+  //set LB_ratio(ratio: number);
+  //set BD_ratio(ratio: number);
 
   measure(): measurements;
   calculate(): coefficients;
 }
 export default class Boat implements ParentBoat {
-  get LOA(): number {
-    return this._LOA;
+  private get _LOA(): number {
+    return this.LOA;
   }
-  set LOA(num: number) {
-    this._LOA = num;
+  private get _LB_ratio(): number {
+    return this.LB_ratio;
   }
-
-  get CB_ratio(): number {
-    return this._CB_ratio;
-  }
-  set CB_ratio(ratio: number) {
-    this._CB_ratio = ratio;
+  private get _BD_ratio(): number {
+    return this.BD_ratio;
   }
 
-  get BD_ratio(): number {
-    return this._BD_ratio;
-  }
-  set BD_ratio(ratio: number) {
-    this._BD_ratio = ratio;
-  }
-
+  private beam = this._LOA / this._LB_ratio;
+  private draught = this.beam / this._BD_ratio;
+  //private volume = this._LOA * 123;
   constructor(
-    private _LOA: number,
-    private _CB_ratio: number = 0.1,
-    private _BD_ratio: number = 0.2
+    private LOA: number,
+    private LB_ratio: number,
+    private BD_ratio: number
   ) {
+    if (this.LB_ratio < 2 || this.LB_ratio > 6) {
+      throw new Error("LB_ratio range is from 2 to 6");
+    }
+    if (this.BD_ratio < 1 || this.BD_ratio > 2) {
+      throw new Error("BD_ratio range is from 1 to 2");
+    }
     new Scene();
   }
 
   measure(): measurements {
     return {
       LOA: this.LOA,
-      beam: this.LOA * this.CB_ratio,
-      draft: this.LOA * this.BD_ratio,
+      beam: this.beam,
+      draught: this.draught,
+      LB_ratio: this._LB_ratio,
+      BD_ratio: this._BD_ratio,
     };
   }
   calculate(): coefficients {
