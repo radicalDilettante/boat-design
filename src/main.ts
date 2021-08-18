@@ -1,16 +1,23 @@
-import Boat from "./boat/boat";
-import * as HULL from "./boat/hull";
+import Boat from "./boat/boat.js";
+import * as HULL from "./boat/hull.js";
 
 interface ChildBoat {
   addHull(material: string): void;
   removeHull(): void;
 }
 
-export class TrailerBoat extends Boat implements ChildBoat {
+class MonoHull extends Boat implements ChildBoat {
   private currentHull = false;
   private hull;
-  constructor(LOA: number, LB_ratio = 4, BD_ratio = 1.5) {
-    super(LOA, LB_ratio, BD_ratio);
+  constructor(length: number) {
+    super(
+      length,
+      1, // LB_ratio: Length / Beam ratio
+      1, // BD_ratio: Beam / Draught ratio
+      1, // Cv : Volume Coefficient (Volume = length * Cv)
+      1, // CAm : Midship Area Coefficient (Midship Area = length * CAm)
+      1 // CAw: Water Plane Area Coefficient (Water Plane Area = length * CAw)
+    );
     this.hull = new HULL.Trailer();
   }
   addHull(material: "frp" | "timber"): void {
@@ -27,5 +34,5 @@ export class TrailerBoat extends Boat implements ChildBoat {
   }
 }
 
-const boat = new TrailerBoat(9000, 3);
+const boat = new MonoHull(9000);
 console.log(boat.measure());

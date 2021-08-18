@@ -5,8 +5,7 @@
   "main": "./src/main.ts",
   "scripts": {
     "test": "cd src && ts-node main",
-    "dev": "webpack --mode development",
-    "build": "webpack --mode production"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -30,5 +29,6 @@
   },
   "dependencies": {
     "three": "^0.131.3"
-  }
+  },
+  "type": "module"
 }
