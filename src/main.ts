@@ -43,3 +43,12 @@ export class FlatBottom extends Boat {
     );
   }
 }
+
+const boat = new VShaped(9000);
+console.log(boat.measure());
+console.log(boat.calculate());
+console.log("---------------------");
+console.log(boat.changeLength(5000));
+
+console.log(boat.measure());
+console.log(boat.calculate());

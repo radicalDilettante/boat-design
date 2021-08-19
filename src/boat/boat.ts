@@ -1,5 +1,5 @@
 import { Scene } from "../render/scene.js";
-import * as HULL from "../boat/hull.js";
+import * as HULL from "./hull.js";
 
 //import Render from "./render/index";
 type measurements = {
@@ -14,6 +14,7 @@ type DeckType = "cabin" | "centerConsole";
 type HullClass = HULL.VShaped | HULL.RoundBottom | HULL.FlatBottom;
 
 interface IBoat {
+  changeLength(length: number): void;
   measure(): measurements;
   calculate(): coefficients;
   addHull(material: string): void;
@@ -22,18 +23,29 @@ interface IBoat {
 }
 
 export default class Boat implements IBoat {
-  protected currentDeck = false;
+  private currentDeck = false;
 
   private get _length(): number {
     return this.length;
+  } // _length: internal value of LOA to calculate other values
+  private get beam(): number {
+    return this._length / this.LB_ratio;
   }
-
-  private beam = this._length / this.LB_ratio;
-  private draught = this.beam / this.BD_ratio;
-  private volume = this._length * this.Cv; // Displacement Area
-  private displacement = this.volume * 9.8 * 1.025;
-  private Am = this._length * this.CAm; // Midship Area
-  private Aw = this._length * this.CAw; // Water Plane Area
+  private get draught(): number {
+    return this.beam / this.BD_ratio;
+  }
+  private get volume(): number {
+    return this._length * this.Cv;
+  } // Displacement Area
+  private get displacement(): number {
+    return this.volume * 9.8 * 1.025;
+  }
+  private get Am(): number {
+    return this._length * this.CAm;
+  } // Midship Area
+  private get Aw(): number {
+    return this._length * this.CAw;
+  } // Water Plane Area
 
   constructor(
     private hull: HullClass,
@@ -45,6 +57,10 @@ export default class Boat implements IBoat {
     private CAw: number // CAw: Water Plane Area Coefficient (Water Plane Area = length * CAw)
   ) {
     new Scene();
+  }
+
+  changeLength(length: number): void {
+    this.length = length;
   }
 
   measure(): measurements {
@@ -68,6 +84,7 @@ export default class Boat implements IBoat {
     this.hull = new HULL.VShaped();
     this.hull.add(material);
   }
+
   addDeck(type: DeckType): void {
     this.removeDeck;
     switch (type) {
@@ -77,6 +94,7 @@ export default class Boat implements IBoat {
     }
     this.currentDeck = true;
   }
+
   removeDeck(): void {
     if (this.currentDeck) {
       this.removeDeck();
