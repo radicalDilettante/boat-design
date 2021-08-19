@@ -23,6 +23,7 @@ export default class Boat implements ParentBoat {
   private displacement = this.volume * 9.8 * 1.025;
   private Am = this._length * this.CAm; // Midship Area
   private Aw = this._length * this.CAw; // Water Plane Area
+
   constructor(
     private length: number,
     private LB_ratio: number,
