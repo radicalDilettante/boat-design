@@ -1,4 +1,6 @@
 import { Scene } from "../render/scene.js";
+import * as HULL from "../boat/hull.js";
+
 //import Render from "./render/index";
 type measurements = {
   length: number;
@@ -7,12 +9,21 @@ type measurements = {
   displacement: number;
 };
 type coefficients = { Cb: number; Cp: number; Cm: number; Cw: number };
-interface ParentBoat {
+type HullMaterial = "frp" | "timber";
+type DeckType = "cabin" | "centerConsole";
+type HullClass = HULL.VShaped | HULL.RoundBottom | HULL.FlatBottom;
+
+interface IBoat {
   measure(): measurements;
   calculate(): coefficients;
+  addHull(material: string): void;
+  addDeck(type: string): void;
+  removeDeck(): void;
 }
 
-export default class Boat implements ParentBoat {
+export default class Boat implements IBoat {
+  protected currentDeck = false;
+
   private get _length(): number {
     return this.length;
   }
@@ -25,12 +36,13 @@ export default class Boat implements ParentBoat {
   private Aw = this._length * this.CAw; // Water Plane Area
 
   constructor(
-    private length: number,
-    private LB_ratio: number,
-    private BD_ratio: number,
-    private Cv: number,
-    private CAm: number,
-    private CAw: number
+    private hull: HullClass,
+    private length: number, // LOA: Length of Overall
+    private LB_ratio: number, // LB_ratio: Length / Beam ratio
+    private BD_ratio: number, // BD_ratio: Beam / Draught ratio
+    private Cv: number, // Cv : Volume Coefficient (Volume = length * Cv)
+    private CAm: number, // CAm : Midship Area Coefficient (Midship Area = length * CAm)
+    private CAw: number // CAw: Water Plane Area Coefficient (Water Plane Area = length * CAw)
   ) {
     new Scene();
   }
@@ -50,5 +62,24 @@ export default class Boat implements ParentBoat {
       Cm: this.Am / (this.beam * this.draught), // Midship Section Coefficient
       Cw: this.Aw / (this.beam * this._length), // Water Plane Area Coefficient
     };
+  }
+
+  addHull(material: HullMaterial): void {
+    this.hull = new HULL.VShaped();
+    this.hull.add(material);
+  }
+  addDeck(type: DeckType): void {
+    this.removeDeck;
+    switch (type) {
+      case "cabin":
+        console.log("cabin");
+        break;
+    }
+    this.currentDeck = true;
+  }
+  removeDeck(): void {
+    if (this.currentDeck) {
+      this.removeDeck();
+    }
   }
 }
