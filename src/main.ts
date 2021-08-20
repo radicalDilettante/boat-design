@@ -7,11 +7,11 @@ export class VShaped extends Boat {
     super(
       new HULL.VShaped(), // hull type
       length, // LOA
-      1, // LB_ratio
-      1, // BD_ratio
-      1, // Cv
-      1, // CAm
-      1 // CAw
+      10 / 3.5, // LB_ratio
+      3.5 / 0.8, // BD_ratio
+      6.5, // StdDisplacementVolume
+      4.5, // StdMidshipArea
+      5.2 // StdWaterPlaneArea
     );
   }
 }

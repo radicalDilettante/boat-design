@@ -35,26 +35,26 @@ export default class Boat implements IBoat {
     return this.beam / this.BD_ratio;
   }
   private get volume(): number {
-    return this._length * this.Cv;
+    return ((this._length / 10) ^ 3) * this.StdDisplacementVolume;
   } // Displacement Area
   private get displacement(): number {
     return this.volume * 9.8 * 1.025;
   }
   private get Am(): number {
-    return this._length * this.CAm;
+    return ((this._length / 10) ^ 2) * this.StdMidshipArea;
   } // Midship Area
   private get Aw(): number {
-    return this._length * this.CAw;
+    return ((this._length / 10) ^ 2) * this.StdWaterPlaneArea;
   } // Water Plane Area
 
   constructor(
     private hull: HullClass,
-    private length: number, // LOA: Length of Overall
+    private length: number, // LOA: Length of Overall m
     private LB_ratio: number, // LB_ratio: Length / Beam ratio
     private BD_ratio: number, // BD_ratio: Beam / Draught ratio
-    private Cv: number, // Cv : Volume Coefficient (Volume = length * Cv)
-    private CAm: number, // CAm : Midship Area Coefficient (Midship Area = length * CAm)
-    private CAw: number // CAw: Water Plane Area Coefficient (Water Plane Area = length * CAw)
+    private StdDisplacementVolume: number, // StdDisplacementVolume: 10m hull displacement volume m^3
+    private StdMidshipArea: number, // StdMidshipArea : 10m hull Midship Area m^2
+    private StdWaterPlaneArea: number // StdWaterPlaneArea: Water Plane Area Coefficient (Water Plane Area = length * StdWaterPlaneArea) m^3
   ) {
     new Scene();
   }
