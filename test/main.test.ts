@@ -1,3 +1,4 @@
+import { VolumeProperties } from "./../src/boat/calculate";
 import { VShaped } from "../src/main";
 
 describe("Launcher test suite", () => {
@@ -30,5 +31,17 @@ describe("Launcher test suite", () => {
       midshipSectionArea: 0.7,
       midshipCoefficient: 0.4,
     });
+  });
+
+  test.only("length changing test", () => {
+    const volumeProperties = vShaped.volumeProperties();
+    const changedLength = 5;
+    vShaped.changeLength(changedLength);
+    const changedVolumeProperties = vShaped.volumeProperties();
+    //console.log(volumeProperties);
+    //console.log(changedVolumeProperties);
+
+    expect(vShaped.measure().length).toBe(changedLength);
+    expect(changedVolumeProperties).not.toEqual(volumeProperties);
   });
 });
