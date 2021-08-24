@@ -1,22 +1,24 @@
-import Boat from "./boat/boat.js";
-import * as HULL from "./boat/hull.js";
-//import * as DECK from "./boat/deck.js";
+import Boat from "./boat/boat";
+import * as HULL from "./boat/hull";
+//import * as DECK from "./boat/deck";
 
 export class VShaped extends Boat {
   constructor(length: number) {
     super(
       new HULL.VShaped(), // hull type
       length, // LOA
-      10 / 3.5, // LB_ratio
-      3.5 / 0.8, // BD_ratio
-      6.5, // StdDisplacementVolume
-      4.5, // StdMidshipArea
-      5.2 // StdWaterPlaneArea
+      10 / 3.5, // Length / Beam ratio
+      3.5 / 0.5, // Beam / Draught ratio
+      0.9, // Water Line Ratio
+      4.4, // Displacement Volume for 10m hull
+      0.7, // Midship Area for 10m hull
+      20.2, // Water Plane Area for 10m hull
+      22.4 // Wetted Surface Area for 10m hull
     );
   }
 }
 
-export class RoundBottom extends Boat {
+/*export class RoundBottom extends Boat {
   constructor(length: number) {
     super(
       new HULL.RoundBottom(), // hull type
@@ -43,12 +45,4 @@ export class FlatBottom extends Boat {
     );
   }
 }
-
-const boat = new VShaped(9000);
-console.log(boat.measure());
-console.log(boat.calculate());
-console.log("---------------------");
-console.log(boat.changeLength(5000));
-
-console.log(boat.measure());
-console.log(boat.calculate());
+*/

@@ -1,22 +1,45 @@
-import { Scene } from "../render/scene.js";
-import * as HULL from "./hull.js";
+import { Scene } from "../render/scene";
+import * as HULL from "./hull";
+
+const decimal = (num: number) => {
+  return Math.round(num * 100) / 100;
+};
 
 //import Render from "./render/index";
-type measurements = {
-  length: number;
-  beam: number;
-  draught: number;
-  displacement: number;
-};
-type coefficients = { Cb: number; Cp: number; Cm: number; Cw: number };
 type HullMaterial = "frp" | "timber";
 type DeckType = "cabin" | "centerConsole";
 type HullClass = HULL.VShaped | HULL.RoundBottom | HULL.FlatBottom;
 
+type Measure = {
+  length: number; // m
+  beam: number; // m
+  draught: number; // m
+};
+type VolumeProperties = {
+  displacedVolume: number; // m^3
+  displacement: number; // t
+  blockCoefficient: number;
+  prismaticCoefficient: number;
+  wettedSurfaceArea: number; // m^2
+};
+type WaterPlaneProperties = {
+  lengthOfWaterline: number; // m
+  waterPlaneArea: number; // m^2
+  waterPlaneCoefficient: number;
+};
+type MidshipProperties = {
+  midshipSectionArea: number; // m^2
+  midshipCoefficient: number;
+};
+
 interface IBoat {
   changeLength(length: number): void;
-  measure(): measurements;
-  calculate(): coefficients;
+
+  measure(): Measure;
+  volumeProperties(): VolumeProperties;
+  waterPlaneProperties(): WaterPlaneProperties;
+  midshipProperties(): MidshipProperties;
+
   addHull(material: string): void;
   addDeck(type: string): void;
   removeDeck(): void;
@@ -25,36 +48,51 @@ interface IBoat {
 export default class Boat implements IBoat {
   private currentDeck = false;
 
+  //measure
   private get _length(): number {
     return this.length;
   } // _length: internal value of LOA to calculate other values
   private get beam(): number {
-    return this._length / this.LB_ratio;
+    return this._length / this.lengthBeamRatio;
   }
   private get draught(): number {
-    return this.beam / this.BD_ratio;
+    return this.beam / this.beamDraughtRatio;
   }
-  private get volume(): number {
-    return ((this._length / 10) ^ 3) * this.StdDisplacementVolume;
-  } // Displacement Area
+
+  //volumeProperties
+  private get displacedVolume(): number {
+    return Math.pow(this._length / 10, 3) * this.stdDisplacementVolume;
+  }
   private get displacement(): number {
-    return this.volume * 9.8 * 1.025;
+    return this.displacedVolume * 1.025;
   }
-  private get Am(): number {
-    return ((this._length / 10) ^ 2) * this.StdMidshipArea;
-  } // Midship Area
-  private get Aw(): number {
-    return ((this._length / 10) ^ 2) * this.StdWaterPlaneArea;
-  } // Water Plane Area
+  private get wettedSurfaceArea(): number {
+    return Math.pow(this._length / 10, 2) * this.stdWettedSurfaceArea;
+  }
+
+  //waterPlaneProperties
+  private get lengthOfWaterLine(): number {
+    return this._length * this.waterLineRatio;
+  }
+  private get waterPlaneArea(): number {
+    return Math.pow(this._length / 10, 2) * this.stdWaterPlaneArea;
+  }
+
+  //midshipProperties
+  private get midshipSectionArea(): number {
+    return Math.pow(this._length / 10, 2) * this.stdMidshipSectionArea;
+  }
 
   constructor(
-    private hull: HullClass,
-    private length: number, // LOA: Length of Overall m
-    private LB_ratio: number, // LB_ratio: Length / Beam ratio
-    private BD_ratio: number, // BD_ratio: Beam / Draught ratio
-    private StdDisplacementVolume: number, // StdDisplacementVolume: 10m hull displacement volume m^3
-    private StdMidshipArea: number, // StdMidshipArea : 10m hull Midship Area m^2
-    private StdWaterPlaneArea: number // StdWaterPlaneArea: Water Plane Area Coefficient (Water Plane Area = length * StdWaterPlaneArea) m^3
+    private hull: HullClass, // hull type
+    private length: number, // Length of Overall (m)
+    private lengthBeamRatio: number, // Length / Beam ratio
+    private beamDraughtRatio: number, // Beam / Draught ratio
+    private waterLineRatio: number, // Water Line Ratio
+    private stdDisplacementVolume: number, // Displacement Volume for 10m hull (m^3)
+    private stdMidshipSectionArea: number, // Midship Area for 10m hull (m^2)
+    private stdWaterPlaneArea: number, // Water Plane Area for 10m (m^2)
+    private stdWettedSurfaceArea: number // Wetted Surface Area for 10m hull (m^2)
   ) {
     new Scene();
   }
@@ -63,20 +101,44 @@ export default class Boat implements IBoat {
     this.length = length;
   }
 
-  measure(): measurements {
+  measure(): Measure {
     return {
-      length: this._length,
-      beam: this.beam,
-      draught: this.draught,
-      displacement: this.displacement,
+      length: decimal(this._length),
+      beam: decimal(this.beam),
+      draught: decimal(this.draught),
     };
   }
-  calculate(): coefficients {
+
+  volumeProperties(): VolumeProperties {
     return {
-      Cb: this.volume / (this._length * this.beam * this.draught), // Block Coefficient
-      Cp: this.volume / (this.Am * this._length), // Prismatic Coefficient
-      Cm: this.Am / (this.beam * this.draught), // Midship Section Coefficient
-      Cw: this.Aw / (this.beam * this._length), // Water Plane Area Coefficient
+      displacedVolume: decimal(this.displacedVolume),
+      displacement: decimal(this.displacement),
+      blockCoefficient: decimal(
+        this.displacedVolume / (this._length * this.beam * this.draught)
+      ),
+      prismaticCoefficient: decimal(
+        this.displacedVolume / (this.midshipSectionArea * this._length)
+      ),
+      wettedSurfaceArea: decimal(this.wettedSurfaceArea),
+    };
+  }
+
+  waterPlaneProperties(): WaterPlaneProperties {
+    return {
+      lengthOfWaterline: decimal(this.lengthOfWaterLine),
+      waterPlaneArea: decimal(this.waterPlaneArea),
+      waterPlaneCoefficient: decimal(
+        this.waterPlaneArea / (this.beam * this._length)
+      ),
+    };
+  }
+
+  midshipProperties(): MidshipProperties {
+    return {
+      midshipSectionArea: decimal(this.midshipSectionArea),
+      midshipCoefficient: decimal(
+        this.midshipSectionArea / (this.beam * this.draught)
+      ),
     };
   }
 

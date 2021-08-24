@@ -4,7 +4,7 @@
   "description": "Boilerplate with webpack and typescript",
   "main": "./src/main.ts",
   "scripts": {
-    "test": "cd src && node --loader ts-node/esm main.ts",
+    "test": "jest",
     "build": "tsc"
   },
   "repository": {
@@ -21,10 +21,14 @@
   },
   "homepage": "https://github.com/waynethebb/ts-webpack-boilerplate#readme",
   "devDependencies": {
+    "@types/babel__core": "^7.1.15",
+    "@types/jest": "^27.0.1",
     "@types/three": "^0.131.0",
     "@typescript-eslint/eslint-plugin": "^4.29.1",
     "@typescript-eslint/parser": "^4.29.1",
     "eslint": "^7.32.0",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.5",
     "ts-node": "^10.2.1",
     "typescript": "^4.3.5"
   },
