@@ -1,44 +1,18 @@
+import * as Calculate from "./calculate";
 import { Scene } from "../render/scene";
 import * as HULL from "./hull";
-
-const decimal = (num: number) => {
-  return Math.round(num * 100) / 100;
-};
 
 //import Render from "./render/index";
 type HullMaterial = "frp" | "timber";
 type DeckType = "cabin" | "centerConsole";
 type HullClass = HULL.VShaped | HULL.RoundBottom | HULL.FlatBottom;
 
-type Measure = {
-  length: number; // m
-  beam: number; // m
-  draught: number; // m
-};
-type VolumeProperties = {
-  displacedVolume: number; // m^3
-  displacement: number; // t
-  blockCoefficient: number;
-  prismaticCoefficient: number;
-  wettedSurfaceArea: number; // m^2
-};
-type WaterPlaneProperties = {
-  lengthOfWaterline: number; // m
-  waterPlaneArea: number; // m^2
-  waterPlaneCoefficient: number;
-};
-type MidshipProperties = {
-  midshipSectionArea: number; // m^2
-  midshipCoefficient: number;
-};
-
 interface IBoat {
   changeLength(length: number): void;
-
-  measure(): Measure;
-  volumeProperties(): VolumeProperties;
-  waterPlaneProperties(): WaterPlaneProperties;
-  midshipProperties(): MidshipProperties;
+  measure(): Calculate.Measure;
+  volumeProperties(): Calculate.VolumeProperties;
+  waterPlaneProperties(): Calculate.WaterPlaneProperties;
+  midshipProperties(): Calculate.MidshipProperties;
 
   addHull(material: string): void;
   addDeck(type: string): void;
@@ -47,41 +21,7 @@ interface IBoat {
 
 export default class Boat implements IBoat {
   private currentDeck = false;
-
-  //measure
-  private get _length(): number {
-    return this.length;
-  } // _length: internal value of LOA to calculate other values
-  private get beam(): number {
-    return this._length / this.lengthBeamRatio;
-  }
-  private get draught(): number {
-    return this.beam / this.beamDraughtRatio;
-  }
-
-  //volumeProperties
-  private get displacedVolume(): number {
-    return Math.pow(this._length / 10, 3) * this.stdDisplacementVolume;
-  }
-  private get displacement(): number {
-    return this.displacedVolume * 1.025;
-  }
-  private get wettedSurfaceArea(): number {
-    return Math.pow(this._length / 10, 2) * this.stdWettedSurfaceArea;
-  }
-
-  //waterPlaneProperties
-  private get lengthOfWaterLine(): number {
-    return this._length * this.waterLineRatio;
-  }
-  private get waterPlaneArea(): number {
-    return Math.pow(this._length / 10, 2) * this.stdWaterPlaneArea;
-  }
-
-  //midshipProperties
-  private get midshipSectionArea(): number {
-    return Math.pow(this._length / 10, 2) * this.stdMidshipSectionArea;
-  }
+  private calculate;
 
   constructor(
     private hull: HullClass, // hull type
@@ -94,52 +34,34 @@ export default class Boat implements IBoat {
     private stdWaterPlaneArea: number, // Water Plane Area for 10m (m^2)
     private stdWettedSurfaceArea: number // Wetted Surface Area for 10m hull (m^2)
   ) {
+    this.calculate = new Calculate.Calculate(
+      this.length,
+      this.lengthBeamRatio,
+      this.beamDraughtRatio,
+      this.waterLineRatio,
+      this.stdDisplacementVolume,
+      this.stdMidshipSectionArea,
+      this.stdWaterPlaneArea,
+      this.stdWettedSurfaceArea
+    );
     new Scene();
   }
 
+  // Calculate
   changeLength(length: number): void {
-    this.length = length;
+    this.calculate.changeLength(length);
   }
-
-  measure(): Measure {
-    return {
-      length: decimal(this._length),
-      beam: decimal(this.beam),
-      draught: decimal(this.draught),
-    };
+  measure(): Calculate.Measure {
+    return this.calculate.measure();
   }
-
-  volumeProperties(): VolumeProperties {
-    return {
-      displacedVolume: decimal(this.displacedVolume),
-      displacement: decimal(this.displacement),
-      blockCoefficient: decimal(
-        this.displacedVolume / (this._length * this.beam * this.draught)
-      ),
-      prismaticCoefficient: decimal(
-        this.displacedVolume / (this.midshipSectionArea * this._length)
-      ),
-      wettedSurfaceArea: decimal(this.wettedSurfaceArea),
-    };
+  volumeProperties(): Calculate.VolumeProperties {
+    return this.calculate.volumeProperties();
   }
-
-  waterPlaneProperties(): WaterPlaneProperties {
-    return {
-      lengthOfWaterline: decimal(this.lengthOfWaterLine),
-      waterPlaneArea: decimal(this.waterPlaneArea),
-      waterPlaneCoefficient: decimal(
-        this.waterPlaneArea / (this.beam * this._length)
-      ),
-    };
+  waterPlaneProperties(): Calculate.WaterPlaneProperties {
+    return this.calculate.waterPlaneProperties();
   }
-
-  midshipProperties(): MidshipProperties {
-    return {
-      midshipSectionArea: decimal(this.midshipSectionArea),
-      midshipCoefficient: decimal(
-        this.midshipSectionArea / (this.beam * this.draught)
-      ),
-    };
+  midshipProperties(): Calculate.MidshipProperties {
+    return this.calculate.midshipProperties();
   }
 
   addHull(material: HullMaterial): void {
